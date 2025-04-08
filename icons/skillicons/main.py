@@ -1,31 +1,30 @@
 import os
-from PIL import Image
 
-# Sabitler
-OUTPUT_FOLDER = "cropped"
-CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/CDNDG/cdn/icons/itemicons/cropped/"
-
-# Çıktı klasörü oluştur
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+# Ayarlar
+CDN_BASE_URL = "https://cdn.jsdelivr.net/gh/CDNDG/cdn/icons/skillicons/"
 
 # PNG dosyalarını bul
 png_files = [f for f in os.listdir('.') if f.lower().endswith('.png')]
 
-# Resimleri kırp ve kaydet
+# Geçerli boyutta olanları filtrele (isteğe bağlı kontrol)
+valid_icons = []
 for file in png_files:
-    img = Image.open(file)
-    if img.size == (64, 64):
-        cropped = img.crop((0, 0, 45, 45))  # Sol üstten 45x45
-        cropped.save(os.path.join(OUTPUT_FOLDER, file))
-    else:
-        print(f"{file} atlandı (64x64 değil)")
+    try:
+        from PIL import Image
+        img = Image.open(file)
+        if img.size == (32, 32):
+            valid_icons.append(file)
+        else:
+            print(f"{file} atlandı (32x32 değil)")
+    except:
+        print(f"{file} okunamadı")
 
 # HTML içeriği
 html = f'''<!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>CDN Galeri</title>
+  <title>Skillicons Galeri</title>
   <style>
     body {{
       background-color: black;
@@ -39,8 +38,8 @@ html = f'''<!DOCTYPE html>
       gap: 1px;
     }}
     .gallery a img {{
-      width: 45px;
-      height: 45px;
+      width: 32px;
+      height: 32px;
       display: block;
       transition: transform 0.2s ease;
     }}
@@ -48,7 +47,6 @@ html = f'''<!DOCTYPE html>
       transform: scale(1.5);
       z-index: 10;
     }}
-    /* Lightbox stil */
     .lightbox {{
       position: fixed;
       top: 0; left: 0;
@@ -71,14 +69,14 @@ html = f'''<!DOCTYPE html>
   <div class="gallery">
 '''
 
-# Görselleri HTML'e ekle
-for file in png_files:
+# Görselleri CDN yoluyla ekle
+for file in valid_icons:
     cdn_path = f"{CDN_BASE_URL}{file}"
     html += f'    <a href="{cdn_path}" download title="{file}"><img src="{cdn_path}" alt="{file}"></a>\n'
 
 html += '''  </div>
 
-  <!-- Lightbox script -->
+  <!-- Lightbox -->
   <div id="lightbox" class="lightbox" onclick="this.style.display='none'">
     <img id="lightbox-img" src="">
   </div>
@@ -97,8 +95,8 @@ html += '''  </div>
 </html>
 '''
 
-# Dosyayı kaydet
-with open("galeri.html", "w", encoding="utf-8") as f:
+# HTML dosyasını kaydet
+with open("skillicons_galeri.html", "w", encoding="utf-8") as f:
     f.write(html)
 
-print(f"{len(png_files)} PNG işlendi. 'galeri.html' oluşturuldu (CDN yolu ayarlı).")
+print(f"{len(valid_icons)} ikon işlendi. 'skillicons_galeri.html' oluşturuldu (CDN ile).")
