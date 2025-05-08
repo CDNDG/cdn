@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transparent OBS Overlay</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: transparent;
+        }
+        
+        .overlay-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .overlay-image {
+            position: absolute;
+            /* Default positioning - can be changed */
+            /* top: 0;
+            left: 0; */
+        }
+        
+        /* Resolution specific settings */
+        .resolution-1920x1080 .overlay-image {
+            /* Example position for 1920x1080 */
+            top: 500px;
+            left: 500px;
+        }
+        
+        .resolution-1280x720 .overlay-image {
+            /* Example position for 1280x720 */
+            top: 333px;
+            left: 333px;
+        }
+        
+        .resolution-1024x768 .overlay-image {
+            /* Example position for 1024x768 */
+            top: 266px;
+            left: 266px;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlayContainer" class="overlay-container">
+        <!-- Images will be added here via JavaScript -->
+    </div>
+
+    <script>
+        // Configuration
+        const config = {
+            resolution: "1920x1080", // Default resolution (1920x1080, 1280x720, 1024x768)
+            images: [
+                {
+                    src: "streamer.png", // Image URL
+                    id: "image1",
+                    position: {
+                        "1920x1080": { top: 500, left: 500 },
+                        "1280x720": { top: 333, left: 333 },
+                        "1024x768": { top: 266, left: 266 }
+                    }
+                }
+                // Add more images as needed
+            ]
+        };
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const resolutionParam = urlParams.get('resolution');
+        
+        // Set resolution from URL parameter or use default
+        const resolution = resolutionParam || config.resolution;
+        
+        // Set the container class based on resolution
+        const container = document.getElementById('overlayContainer');
+        container.className = `overlay-container resolution-${resolution.replace('x', 'x')}`;
+        
+        // Create and position images
+        config.images.forEach(imageConfig => {
+            const img = document.createElement('img');
+            img.src = imageConfig.src;
+            img.id = imageConfig.id;
+            img.className = 'overlay-image';
+            
+            // Apply specific positioning for current resolution
+            if (imageConfig.position[resolution]) {
+                img.style.top = `${imageConfig.position[resolution].top}px`;
+                img.style.left = `${imageConfig.position[resolution].left}px`;
+            }
+            
+            container.appendChild(img);
+        });
+    </script>
+</body>
+</html>
